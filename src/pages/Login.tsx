@@ -8,7 +8,6 @@ import {
     SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import BackButton from '../components/BackButton';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 
@@ -22,7 +21,6 @@ const Login = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <BackButton />
             <View style={styles.content}>
                 <Text style={styles.title}>Login</Text>
                 

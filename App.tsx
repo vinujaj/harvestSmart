@@ -6,18 +6,30 @@ import Login from './src/pages/Login';
 import SignUp from './src/pages/SignUp';
 import BottomNav from './src/components/BottomNav';
 import Home from './src/pages/Home';
+import Results from './src/pages/Results';
+import ImagePreview from './src/pages/ImagePreview';
 
-// Define the navigation type
 export type RootStackParamList = {
   Login: undefined;
   SignUp: undefined;
   MainApp: undefined; // This corresponds to BottomNav
   Home: undefined;
+  Results: { 
+    imageUri: string;
+    totalBunches: number;
+    ripeLevels: {
+      ripe: number;
+      underripe: number;
+      overripe: number;
+      abnormal: number;
+    };
+  };
+  ImagePreview: { imageUri: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const App = () => {
+const App: React.FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -29,6 +41,8 @@ const App = () => {
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="MainApp" component={BottomNav} />
         <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="Results" component={Results} />
+        <Stack.Screen name="ImagePreview" component={ImagePreview} />
       </Stack.Navigator>
     </NavigationContainer>
   );

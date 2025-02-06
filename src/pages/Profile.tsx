@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,16 +6,27 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
+  Modal,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import BackButton from '../components/BackButton';
+
+// Define the type for navigation
+type NavigationProps = NativeStackNavigationProp<any>;
 
 const Profile = () => {
+  const navigation = useNavigation<NavigationProps>();
+  const [modalVisible, setModalVisible] = useState(false);
+
   return (
     <SafeAreaView style={styles.container}>
+      <BackButton />
       <View style={styles.content}>
+        <Text style={styles.title}>Profile</Text>
         <View style={styles.header}>
           <Image
-            source={{ uri: 'https://example.com/profile-avatar.jpg' }}
+            source={require('../../assets/icons/ProfileIcon.png')}
             style={styles.avatar}
           />
           <Text style={styles.name}>John Doe</Text>
@@ -24,29 +35,58 @@ const Profile = () => {
 
         <View style={styles.menuContainer}>
           <TouchableOpacity style={styles.menuItem}>
-            <Icon name="person-outline" size={24} color="#374151" />
             <Text style={styles.menuText}>Edit Profile</Text>
-            <Icon name="chevron-forward" size={24} color="#374151" />
+            <Image
+              source={require('../../assets/icons/Forward.png')}
+              style={styles.forwardIcon}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem}>
-            <Icon name="settings-outline" size={24} color="#374151" />
             <Text style={styles.menuText}>Settings</Text>
-            <Icon name="chevron-forward" size={24} color="#374151" />
+            <Image
+              source={require('../../assets/icons/Forward.png')}
+              style={styles.forwardIcon}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem}>
-            <Icon name="help-circle-outline" size={24} color="#374151" />
             <Text style={styles.menuText}>Help & Support</Text>
-            <Icon name="chevron-forward" size={24} color="#374151" />
+            <Image
+              source={require('../../assets/icons/Forward.png')}
+              style={styles.forwardIcon}
+            />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.menuItem, styles.logout]}>
-            <Icon name="log-out-outline" size={24} color="#EF4444" />
-            <Text style={[styles.menuText, styles.logoutText]}>Logout</Text>
+          {/* Logout Button - Opens Modal */}
+          <TouchableOpacity style={styles.logout} onPress={() => setModalVisible(true)}>
+            <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Custom Styled Logout Confirmation Modal */}
+      <Modal transparent={true} visible={modalVisible} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Logout</Text>
+            <Text style={styles.modalMessage}>Are you sure you want to log out?</Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.confirmButton} onPress={() => {
+                setModalVisible(false);
+                navigation.replace('Login'); // Navigate to login screen
+              }}>
+                <Text style={styles.confirmText}>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -56,9 +96,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
+  logout: {
+    marginTop: 102,
+    backgroundColor: 'red',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 28,
+    width: '70%',
+    alignSelf: 'center',
+  },
+  logoutText: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   content: {
     flex: 1,
     padding: 24,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 24,
+    marginLeft: 48,
   },
   header: {
     alignItems: 'center',
@@ -95,12 +156,63 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#374151',
   },
-  logout: {
-    marginTop: 32,
-    backgroundColor: '#FEE2E2',
+  forwardIcon: {
+    width: 24,
+    height: 24,
   },
-  logoutText: {
-    color: '#EF4444',
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  cancelButton: {
+    backgroundColor: '#E5E7EB',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  cancelText: {
+    color: '#374151',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  confirmButton: {
+    backgroundColor: 'white',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'red',
+  },
+  confirmText: {
+    color: 'red',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

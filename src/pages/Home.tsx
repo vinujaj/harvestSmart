@@ -1,50 +1,88 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, PermissionsAndroid, Platform,Alert } from 'react-native';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import CustomIcon from '../components/CustomIcon';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+type RootStackParamList = {
+  ImagePreview: { imageUri: string };
+  // Add other screens if necessary
+};
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'ImagePreview'>;
 
 const Home = () => {
-  const openCamera = () => {
-    launchCamera(
-      {
-        mediaType: 'photo',
-        saveToPhotos: true,
-        cameraType: 'back',
-      },
-      (response) => {
-        if (response.didCancel) {
-          console.log('User cancelled camera');
-        } else if (response.errorCode) {
-          console.log('Camera error: ', response.errorMessage);
-        } else {
-          console.log('Image captured: ', response.assets);
+  const [cameraPermission, setCameraPermission] = useState(false);
+  const navigation = useNavigation<NavigationProp>();
+
+  useEffect(() => {
+    requestPermissions();
+  }, []);
+
+  const requestPermissions = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        // Request Camera Permission
+        const cameraGranted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: 'Camera Permission',
+            message: 'HarvestSmart needs access to your camera to capture images.',
+            buttonPositive: 'OK',
+            buttonNegative: 'Cancel',
+          }
+        );
+
+        let storageGranted = PermissionsAndroid.RESULTS.GRANTED;
+
+        if (Platform.Version >= 33) {
+          storageGranted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+          );
         }
+
+        if (
+          cameraGranted === PermissionsAndroid.RESULTS.GRANTED &&
+          storageGranted === PermissionsAndroid.RESULTS.GRANTED
+        ) {
+          setCameraPermission(true);
+        } else {
+          setCameraPermission(false);
+          Alert.alert(
+            'Permission Required',
+            'Camera and storage permissions are needed to capture images. Please enable them in settings.'
+          );
+        }
+      } catch (err) {
+        console.warn(err);
       }
-    );
+    } else {
+      setCameraPermission(true);
+    }
+  };
+
+  const openCamera = async () => {
+    if (!cameraPermission) {
+      console.log('Camera permission not granted');
+      return;
+    }
+
+    launchCamera({ mediaType: 'photo', saveToPhotos: true,includeBase64: false }, (response) => {
+      if (!response.didCancel && response.assets && response.assets[0].uri) {
+        const imageUri = response.assets[0].uri!;
+        navigation.navigate('ImagePreview', { imageUri });
+      }
+    });
   };
 
   const openGallery = () => {
-    launchImageLibrary(
-      {
-        mediaType: 'photo',
-      },
-      (response) => {
-        if (response.didCancel) {
-          console.log('User cancelled image picker');
-        } else if (response.errorCode) {
-          console.log('Gallery error: ', response.errorMessage);
-        } else {
-          console.log('Image selected: ', response.assets);
-        }
+    launchImageLibrary({ mediaType: 'photo', includeBase64: false }, (response) => {
+      if (!response.didCancel && response.assets && response.assets[0].uri) {
+        const imageUri = response.assets[0].uri!;
+        navigation.navigate('ImagePreview', { imageUri });
       }
-    );
+    });
   };
 
   return (

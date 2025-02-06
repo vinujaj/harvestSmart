@@ -39,7 +39,7 @@ const BottomNav = () => {
             })}
         >
             <Tab.Screen name="Home" component={Home} />
-            <Tab.Screen name="Report" component={Results} />
+            {/* <Tab.Screen name="Report" component={Results} /> */}
             <Tab.Screen name="Profile" component={Profile} />
         </Tab.Navigator>
     );
@@ -47,13 +47,14 @@ const BottomNav = () => {
 
 const styles = StyleSheet.create({
     icon: {
-        width: 24,
-        height: 24,
+        width: 28,
+        height: 28,
         resizeMode: 'contain',
     },
     tabBar: {
-        height: 60,
+        height: 70,
         paddingBottom: 10,
+        paddingTop: 10,
     },
 });
 

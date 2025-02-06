@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
+import CustomIcon from './CustomIcon';
 
 const BackButton = () => {
   const navigation = useNavigation();
@@ -11,7 +11,7 @@ const BackButton = () => {
       style={styles.button} 
       onPress={() => navigation.goBack()}
     >
-      <Icon name="chevron-back" size={24} color="#000" />
+      <CustomIcon source={require('../../assets/icons/back.png')} size={24} />
     </TouchableOpacity>
   );
 };
@@ -19,19 +19,11 @@ const BackButton = () => {
 const styles = StyleSheet.create({
   button: {
     padding: 8,
+    paddingTop: 16,
     position: 'absolute',
     left: 16,
     top: 16,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    
   },
 });
 
