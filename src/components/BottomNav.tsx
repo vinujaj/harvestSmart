@@ -3,9 +3,9 @@ import { Image, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import Home from '../pages/Home';
-import Report from '../pages/Results'; // Make sure this is correctly imported
+import Report from '../pages/Report'; 
 import Profile from '../pages/Profile';
-import Results from '../pages/Results';
+// import Results from '../pages/Results';
 
 const Tab = createBottomTabNavigator();
 
@@ -28,7 +28,8 @@ const BottomNav = () => {
                         iconSource = focused
                             ? require('../../assets/icons/profile-active.png')
                             : require('../../assets/icons/profile.png');
-                    }
+                    } 
+                    
 
                     return <Image source={iconSource} style={styles.icon} />;
                 },
@@ -39,7 +40,8 @@ const BottomNav = () => {
             })}
         >
             <Tab.Screen name="Home" component={Home} />
-            {/* <Tab.Screen name="Report" component={Results} /> */}
+            <Tab.Screen name="Report" component={Report} />
+            {/* <Tab.Screen name="Results" component={Results} /> */}
             <Tab.Screen name="Profile" component={Profile} />
         </Tab.Navigator>
     );

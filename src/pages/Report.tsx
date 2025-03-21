@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { RouteProp } from '@react-navigation/core';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import axios from 'axios';
 import BackButton from '../components/BackButton';
-import { CommonActions } from '@react-navigation/native';
 
-type ResultsScreenProps = {
-    route: RouteProp<any, "Results">;
-    navigation: NativeStackNavigationProp<any, "Results">;
+type ReportScreenProps = {
+    route: RouteProp<any, "Report">;
+    navigation: NativeStackNavigationProp<any, "Report">;
 };
 
 type DetectionResult = {
-    imageUri: string;
     totalBunches: number;
     ripeLevels: {
         ripe: number;
@@ -24,7 +22,7 @@ type DetectionResult = {
 
 const API_BASE_URL = "http://10.0.2.2:5001"; 
 
-export function ResultsScreen({ navigation, route }: ResultsScreenProps) {
+export function ReportScreen({ navigation, route }: ReportScreenProps) {
     const [results, setResults] = useState<DetectionResult | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -75,15 +73,8 @@ export function ResultsScreen({ navigation, route }: ResultsScreenProps) {
         <ScrollView contentContainerStyle={styles.container}>
             <BackButton />
             <View style={styles.header}>
-                <Text style={styles.headerText}>Results</Text>
+                <Text style={styles.headerText}>Report</Text>
             </View>
-
-            {/* Detected Image */}
-            <Image
-                source={{ uri: results.imageUri }}
-                style={styles.detectedImage}
-                resizeMode="contain"
-            />
 
             {/* Total Bunches Card */}
             <View style={styles.card}>
@@ -125,15 +116,10 @@ export function ResultsScreen({ navigation, route }: ResultsScreenProps) {
             <TouchableOpacity
                 style={styles.confirmButton}
                 onPress={() => {
-                    navigation.dispatch(
-                        CommonActions.reset({
-                            index: 0,
-                            routes: [{ name: 'Home' }],
-                         })
-                    );
+                    console.log("Saving results...");
                 }}
             >
-                 <Text style={styles.confirmButtonText}>SAVE</Text>
+                <Text style={styles.confirmButtonText}>CONFIRM</Text>
             </TouchableOpacity>
         </ScrollView>
     );
@@ -157,12 +143,6 @@ const styles = StyleSheet.create({
         marginBottom: 24,
         marginLeft: 48,
         marginTop: 8,
-    },
-    detectedImage: {
-        height: 300,
-        marginBottom: 16,
-        borderRadius: 8,
-        width: '100%',
     },
     card: {
         marginBottom: 16,
@@ -236,4 +216,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ResultsScreen;
+export default ReportScreen;
