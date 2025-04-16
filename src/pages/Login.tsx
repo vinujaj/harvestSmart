@@ -5,130 +5,129 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
-    SafeAreaView,
+    Alert,
+    ActivityIndicator,
+    Image,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../App';
+import { auth, Auth } from '../config/firebase';
+import { signInWithEmailAndPassword } from '@react-native-firebase/auth';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
-
-
-const Login = () => {
+const Login = ({ navigation }: any) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const navigation = useNavigation<NavigationProp>();
+    const [loading, setLoading] = useState(false);
+
+    const handleLogin = async () => {
+        if (!email || !password) {
+            Alert.alert('Error', 'Please fill in all fields');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            await signInWithEmailAndPassword(auth, email, password);
+            // The auth state change in UserContext manages navigation.
+        } catch (error: any) {
+            Alert.alert('Error', error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                <Text style={styles.title}>Login</Text>
-                
-                <View style={styles.form}>
-                    <Text style={styles.label}>E-mail</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Your email or phone"
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                    />
-
-                    <Text style={styles.label}>Password</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Password"
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                    />
-
-                    <TouchableOpacity>
-                        <Text style={styles.forgotPassword}>Forgot password?</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity 
-                        style={styles.button} 
-                        onPress={() => navigation.navigate('MainApp')}
-                    >
-                        <Text style={styles.buttonText}>LOGIN</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.signupContainer}>
-                        <Text style={styles.signupText}>Don't have an account? </Text>
-                        <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                            <Text style={styles.signupLink}>Sign Up</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </View>
-        </SafeAreaView>
+        <View style={styles.container}>
+            <Image 
+                source={require('../../assets/logo1.png')}
+                style={styles.logo}
+                resizeMode="contain"
+            />
+            <Text style={styles.title}>Welcome Back</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+            />
+            <TouchableOpacity
+                style={styles.button}
+                onPress={handleLogin}
+                disabled={loading}
+            >
+                {loading ? (
+                    <ActivityIndicator color="#fff" />
+                ) : (
+                    <Text style={styles.buttonText}>Login</Text>
+                )}
+            </TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => navigation.navigate('SignUp')}
+                style={styles.linkButton}
+            >
+                <Text style={styles.linkText}>Don't have an account? Sign Up</Text>
+            </TouchableOpacity>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'white',
-    },
-    content: {
-        flex: 1,
-        padding: 24,
+        paddingTop: 10,
+        paddingHorizontal: 20,
         justifyContent: 'center',
+        backgroundColor: '#fff',
+    },
+    logo: {
+        width: 120,
+        height: 120,
+        alignSelf: 'center',
+        marginBottom: 30,
     },
     title: {
-        fontSize: 32,
+        fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 32,
-    },
-    form: {
-        gap: 16,
-    },
-    label: {
-        fontSize: 16,
-        color: '#34A853',
-        marginBottom: 8,
+        marginBottom: 20,
+        textAlign: 'center',
+        color: '#656565',
     },
     input: {
         borderWidth: 1,
-        borderColor: '#34A853',
+        borderColor: '#ddd',
+        padding: 15,
         borderRadius: 8,
-        padding: 16,
+        marginBottom: 15,
         fontSize: 16,
-    },
-    forgotPassword: {
-        color: '#34A853',
-        textAlign: 'right',
-        marginTop: 8,
     },
     button: {
-        backgroundColor: '#34A853',
-        paddingVertical: 16, 
-        paddingHorizontal: 24, 
-        borderRadius: 28,
-        marginTop: 24,
-        width: '70%', 
-        alignSelf: 'center', 
+        backgroundColor: '#068042',
+        padding: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 20,
+        width: '70%',
+        alignSelf: 'center',
     },
-    
     buttonText: {
-        color: 'white',
-        textAlign: 'center',
+        color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
     },
-    signupContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 16,
+    linkButton: {
+        marginTop: 15,
+        alignItems: 'center',
     },
-    signupText: {
-        color: '#34A853',
-    },
-    signupLink: {
-        color: '#34A853',
-        fontWeight: 'bold',
+    linkText: {
+        color: '#068042',
+        fontSize: 16,
     },
 });
 

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "707509188885",
+    "project_id": "harvestsmart-48704",
+    "storage_bucket": "harvestsmart-48704.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:707509188885:android:52ec72b5bd1461c32fd11c",
+        "android_client_info": {
+          "package_name": "com.example.harvestsmart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4kFBSBkYhRUz4KOLGqDj3wSy8nUkbd0s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:707509188885:android:264a12c74cdd68b52fd11c",
+        "android_client_info": {
+          "package_name": "com.harvestsmart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4kFBSBkYhRUz4KOLGqDj3wSy8nUkbd0s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

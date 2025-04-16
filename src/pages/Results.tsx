@@ -3,8 +3,8 @@ import { RouteProp } from '@react-navigation/core';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import BackButton from '../components/BackButton';
-import { CommonActions } from '@react-navigation/native';
 
 type ResultsScreenProps = {
     route: RouteProp<any, "Results">;
@@ -20,9 +20,59 @@ type DetectionResult = {
         overripe: number;
         abnormal: number;
     };
+    timestamp?: string;
 };
 
-const API_BASE_URL = "http://10.0.2.2:5001"; 
+type DailyReport = {
+    date: string;
+    detections: DetectionResult[];
+    totalBunches: number;
+    totalRipeLevels: {
+        ripe: number;
+        underripe: number;
+        overripe: number;
+        abnormal: number;
+    };
+};
+
+const API_BASE_URL = "http://10.0.2.2:5001";
+
+const saveDetectionResult = async (result: DetectionResult) => {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const existingReport = await AsyncStorage.getItem(`report_${today}`);
+        let dailyReport: DailyReport;
+        
+        if (existingReport) {
+            dailyReport = JSON.parse(existingReport);
+            dailyReport.detections.push({
+                ...result,
+                timestamp: new Date().toISOString()
+            });
+            dailyReport.totalBunches += result.totalBunches;
+            dailyReport.totalRipeLevels.ripe += result.ripeLevels.ripe;
+            dailyReport.totalRipeLevels.underripe += result.ripeLevels.underripe;
+            dailyReport.totalRipeLevels.overripe += result.ripeLevels.overripe;
+            dailyReport.totalRipeLevels.abnormal += result.ripeLevels.abnormal;
+        } else {
+            dailyReport = {
+                date: today,
+                detections: [{
+                    ...result,
+                    timestamp: new Date().toISOString()
+                }],
+                totalBunches: result.totalBunches,
+                totalRipeLevels: { ...result.ripeLevels }
+            };
+        }
+
+        await AsyncStorage.setItem(`report_${today}`, JSON.stringify(dailyReport));
+        return true;
+    } catch (error) {
+        console.error('Error saving detection:', error);
+        return false;
+    }
+};
 
 export function ResultsScreen({ navigation, route }: ResultsScreenProps) {
     const [results, setResults] = useState<DetectionResult | null>(null);
@@ -80,7 +130,10 @@ export function ResultsScreen({ navigation, route }: ResultsScreenProps) {
 
             {/* Detected Image */}
             <Image
-                source={{ uri: results.imageUri }}
+                source={{ 
+                    uri: results.imageUri,
+                    cache: 'reload'
+                }}
                 style={styles.detectedImage}
                 resizeMode="contain"
             />
@@ -121,19 +174,35 @@ export function ResultsScreen({ navigation, route }: ResultsScreenProps) {
                 </View>
             </View>
 
-            {/* Confirm Button */}
+            {/* Save Button */}
             <TouchableOpacity
                 style={styles.confirmButton}
-                onPress={() => {
-                    navigation.dispatch(
-                        CommonActions.reset({
-                            index: 0,
-                            routes: [{ name: 'Home' }],
-                         })
-                    );
+                onPress={async () => {
+                    if (results) {
+                        const saved = await saveDetectionResult(results);
+                        if (saved) {
+                            Alert.alert(
+                                "Success",
+                                "Results saved successfully!",
+                                [
+                                    {
+                                        text: "OK",
+                                        onPress: () => {
+                                            navigation.reset({
+                                                index: 0,
+                                                routes: [{ name: 'MainApp' }]
+                                            });
+                                        }
+                                    }
+                                ]
+                            );
+                        } else {
+                            Alert.alert("Error", "Failed to save results");
+                        }
+                    }
                 }}
             >
-                 <Text style={styles.confirmButtonText}>SAVE</Text>
+                <Text style={styles.confirmButtonText}>SAVE</Text>
             </TouchableOpacity>
         </ScrollView>
     );
@@ -144,7 +213,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         backgroundColor: 'white',
         padding: 16,
-        paddingBottom: 100, // Add some padding at the bottom to ensure button visibility
+        paddingBottom: 100,
     },
     header: {
         flexDirection: 'row',
@@ -163,6 +232,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         borderRadius: 8,
         width: '100%',
+        backgroundColor: '#f5f5f5',
     },
     card: {
         marginBottom: 16,

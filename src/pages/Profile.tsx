@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,17 +7,64 @@ import {
   StyleSheet,
   SafeAreaView,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import BackButton from '../components/BackButton';
+import { useUser } from '../context/UserContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import firestore from '@react-native-firebase/firestore';
 
 // Define the type for navigation
 type NavigationProps = NativeStackNavigationProp<any>;
 
+interface UserProfile {
+  name: string;
+  email: string;
+  createdAt: Date;
+}
+
 const Profile = () => {
   const navigation = useNavigation<NavigationProps>();
+  const { signOut, user } = useUser();
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) return;
+      
+      try {
+        const userDoc = await firestore()
+          .collection('users')
+          .doc(user.uid)
+          .get();
+        
+        if (userDoc.exists) {
+          const data = userDoc.data() as UserProfile;
+          setUserProfile(data);
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.clear();
+      await signOut();
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -29,8 +76,14 @@ const Profile = () => {
             source={require('../../assets/icons/ProfileIcon.png')}
             style={styles.avatar}
           />
-          <Text style={styles.name}>John Doe</Text>
-          <Text style={styles.farmerId}>Farmer ID: S02344</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="#068042" />
+          ) : (
+            <>
+              <Text style={styles.name}>{userProfile?.name || 'Loading...'}</Text>
+              <Text style={styles.farmerId}>Farmer ID: {user?.uid.slice(0, 6).toUpperCase()}</Text>
+            </>
+          )}
         </View>
 
         <View style={styles.menuContainer}>
@@ -77,10 +130,7 @@ const Profile = () => {
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.confirmButton} onPress={() => {
-                setModalVisible(false);
-                navigation.replace('Login'); // Navigate to login screen
-              }}>
+              <TouchableOpacity style={styles.confirmButton} onPress={handleLogout}>
                 <Text style={styles.confirmText}>Logout</Text>
               </TouchableOpacity>
             </View>
@@ -102,7 +152,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 28,
-    width: '70%',
+    width: '50%',
     alignSelf: 'center',
   },
   logoutText: {
